@@ -2,7 +2,7 @@
 
 # 有愛新黑（《魔獸世界》字型包）
 
-有愛新黑是《魔獸世界》字型包，支援所有語言。有愛新黑是 [Noto Sans](https://github.com/googlei18n/noto-fonts) 和[思源黑體](https://github.com/adobe-fonts/source-han-sans)的合併字型。
+有愛新黑是《魔獸世界》字型包，支援所有語言。有愛新黑是 [Roboto](https://github.com/google/roboto) 和[思源黑體](https://github.com/adobe-fonts/source-han-sans)的合併字型。
 
 > Make Love, Not Warcraft.<br>
 > 要有爱，不要魔兽争霸。<br>
@@ -14,7 +14,7 @@
 
 ## 下載向導
 
-[最新發佈](https://github.com/CyanoHao/Nowar-Sans/releases)
+[最新發佈](https://github.com/nowar-fonts/Nowar-Neo-Sans/releases)
 
 有愛新黑有 4 種字重和 8 種地區變體。
 
