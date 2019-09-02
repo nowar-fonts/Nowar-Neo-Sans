@@ -14,7 +14,9 @@ This is Nowar Neo Sans, font packs for _World of Warcraft_ that support all clie
 
 ## Download the Fonts
 
-[Latest release](https://github.com/nowar-fonts/Nowar-Neo-Sans/releases)
+[Latest release at GitHub](https://github.com/nowar-fonts/Nowar-Neo-Sans/releases)
+
+Mirrors: [Latest release at Gitee](https://gitee.com/nowar-fonts/Nowar-Neo-Sans/releases)
 
 Nowar Neo Sans is shipped in 4 weights and 8 regional variants.
 

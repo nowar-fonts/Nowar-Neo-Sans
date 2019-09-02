@@ -14,7 +14,9 @@
 
 ## 下载指南
 
-[最新版](https://github.com/nowar-fonts/Nowar-Neo-Sans/releases)
+[GitHub 上的最新版](https://github.com/nowar-fonts/Nowar-Neo-Sans/releases)
+
+镜像：[Gitee 上的最新版](https://gitee.com/nowar-fonts/Nowar-Neo-Sans/releases)
 
 有爱新黑有 4 种字重和 8 种地区变体。
 
