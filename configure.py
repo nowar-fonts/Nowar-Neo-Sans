@@ -5,7 +5,8 @@ from itertools import product
 from types import SimpleNamespace as Namespace
 
 class Config:
-	version = "0.6.0"
+	version = "0.7.0"
+	fontRevision = 0.0700
 	vendor = "Nowar Typeface"
 	vendorId = "NOWR"
 	vendorUrl = "https://github.com/nowar-fonts"
@@ -16,7 +17,15 @@ class Config:
 	licenseUrl = "https://scripts.sil.org/OFL"
 
 	fontPackWeight = [ 300, 400, 500, 700 ]
-	fontPackRegion = [ "CN", "TW", "HK", "JP", "KR", "CL", "OSF", "GB" ]
+	fontPackRegion = [ "CN", "TW", "HK", "JP", "KR", "CL", "GB" ]
+	fontPackFeature = [ "OSF", "SC", "RP" ]
+	# feature tags must be identically ordered as in fontPackFeature
+	fontPackExportFeature = [
+		("CL", [ "OSF" ]),
+		("CL", [ "SC" ]),
+		("CL", [ "OSF", "SC" ]),
+		("GB", [ "RP" ]),
+	]
 
 	fontProviderWeight = [ 300, 400, 500, 700 ]
 	fontProviderWidth = [ 3, 5 ]
@@ -26,35 +35,40 @@ class Config:
 			weight = w,
 			width = wd,
 			family = "UI",
-			region = r,
+			region = r[0] if type(r) == tuple else r,
+			feature = r[1] if type(r) == tuple else [],
 			encoding = "unspec"
 		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CN", "TW", "HK", "JP" ]) ],
 		"western2": [ Namespace(
 			weight = w,
 			width = wd,
 			family = "UI",
-			region = r,
+			region = r[0] if type(r) == tuple else r,
+			feature = r[1] if type(r) == tuple else [],
 			encoding = "unspec"
-		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CL", "OSF" ]) ],
+		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CL", ("CL", [ "OSF" ]), ("CL", [ "SC" ]), ("CL", [ "OSF", "SC" ]) ]) ],
 		"zhCN": [ Namespace(
 			weight = w,
 			width = wd,
 			family = "Sans",
-			region = r,
+			region = r[0] if type(r) == tuple else r,
+			feature = r[1] if type(r) == tuple else [],
 			encoding = "unspec"
 		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CN", "CL" ]) ],
 		"zhTW": [ Namespace(
 			weight = w,
 			width = wd,
 			family = "Sans",
-			region = r,
+			region = r[0] if type(r) == tuple else r,
+			feature = r[1] if type(r) == tuple else [],
 			encoding = "unspec"
 		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "TW", "HK", "CL" ]) ],
 		"koKR": [ Namespace(
 			weight = w,
 			width = wd,
-			family = "Sans",
-			region = r,
+			family = "UI",
+			region = r[0] if type(r) == tuple else r,
+			feature = r[1] if type(r) == tuple else [],
 			encoding = "unspec"
 		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "KR" ]) ],
 	}
@@ -139,12 +153,6 @@ regionalVariant = {
 		"Hant": "CL",
 		"ko": "CL",
 	},
-	"OSF": {
-		"Latn": "OSF",
-		"Hans": "CL",
-		"Hant": "CL",
-		"ko": "CL",
-	},
 	"GB": {
 		"Latn": "GB",
 		"Hans": "GB",
@@ -161,7 +169,6 @@ regionSourceMap = {
 	"JP": "SourceHanSans",
 	"KR": "SourceHanSansK",
 	"CL": "SourceHanSansK",
-	"OSF": "SourceHanSansK",
 	"GB": "SourceHanSansCN",
 }
 
@@ -172,9 +179,15 @@ regionNameMap = {
 	"JP": "JP",
 	"KR": "KR",
 	"CL": "Classical",
-	"OSF": "Oldstyle",
 	"GB": "GB18030",
 }
+
+tagNameMap = dict(regionNameMap)
+tagNameMap.update({
+	"OSF": "Oldstyle",
+	"SC": "Smallcaps",
+	"RP": "Roleplaying",
+})
 
 # set OS/2 encoding to make Windows show font icon in proper language
 encoding = [
@@ -191,50 +204,92 @@ def GetRegion(p):
 	else:
 		return ""
 
-def GenerateFamily(p):
-	impl = {
-		"Sans": lambda region: {
-			0x0409: "Nowar Neo Sans " + regionNameMap[region],
-			0x0804: "有爱新黑 " + regionNameMap[region],
-			0x0404: "有愛新黑 " + regionNameMap[region],
-			0x0C04: "有愛新黑 " + regionNameMap[region],
-			0x0411: "有愛新ゴシック " + regionNameMap[region],
-			0x0412: "有愛 네오 고딕 " + regionNameMap[region],
-		},
-		"UI": lambda region: {
-			0x0409: "Nowar Neo UI " + regionNameMap[region],
-			0x0804: "有爱新黑 UI " + regionNameMap[region],
-			0x0404: "有愛新黑 UI " + regionNameMap[region],
-			0x0C04: "有愛新黑 UI " + regionNameMap[region],
-			0x0411: "有愛新ゴシック UI " + regionNameMap[region],
-			0x0412: "有愛 네오 고딕 UI " + regionNameMap[region],
-		},
-		"WarcraftSans": lambda region: {
-			0x0409: "Nowar Neo Warcraft Sans " + regionNameMap[region],
-			0x0804: "有爱魔兽新黑 " + regionNameMap[region],
-			0x0404: "有愛魔獸新黑 " + regionNameMap[region],
-			0x0C04: "有愛魔獸新黑 " + regionNameMap[region],
-			0x0411: "有愛ウォークラフト新ゴシック " + regionNameMap[region],
-			0x0412: "有愛 워크래프트 네오 고딕 " + regionNameMap[region],
-		},
-		"WarcraftUI": lambda region: {
-			0x0409: "Nowar Neo Warcraft UI " + regionNameMap[region],
-			0x0804: "有爱魔兽新黑 UI " + regionNameMap[region],
-			0x0404: "有愛魔獸新黑 UI " + regionNameMap[region],
-			0x0C04: "有愛魔獸新黑 UI " + regionNameMap[region],
-			0x0411: "有愛ウォークラフト新ゴシック UI " + regionNameMap[region],
-			0x0412: "有愛 워크래프트 네오 고딕 UI " + regionNameMap[region],
-		},
-		"Latin": lambda region: {
-			0x0409: "Nowar Neo UI LCG",
-			0x0804: "有爱新黑 UI LCG",
-			0x0404: "有愛新黑 UI LCG",
-			0x0C04: "有愛新黑 UI LCG",
-			0x0411: "有愛新ゴシック UI LCG",
-			0x0412: "有愛 네오 고딕 UI LCG",
+def LocalizedFamily(p):
+	if "nameList" not in LocalizedFamily.__dict__:
+		LocalizedFamily.nameList = {
+			"Sans": {
+				0x0409: "Nowar Neo Sans",
+				0x0804: "有爱新黑",
+				0x0404: "有愛新黑",
+				0x0C04: "有愛新黑",
+				0x0411: "有愛新ゴシック",
+				0x0412: "有愛 네오 고딕",
+			},
+			"UI": {
+				0x0409: "Nowar Neo UI",
+				0x0804: "有爱新黑 UI",
+				0x0404: "有愛新黑 UI",
+				0x0C04: "有愛新黑 UI",
+				0x0411: "有愛新ゴシック UI",
+				0x0412: "有愛 네오 고딕 UI",
+			},
+			"WarcraftSans": {
+				0x0409: "Nowar Neo Warcraft Sans",
+				0x0804: "有爱魔兽黑体",
+				0x0404: "有愛魔獸新黑",
+				0x0C04: "有愛魔獸新黑",
+				0x0411: "有愛ウォークラフト新ゴシック",
+				0x0412: "有愛 네오 워크래프트 고딕",
+			},
+			"WarcraftUI": {
+				0x0409: "Nowar Neo Warcraft UI",
+				0x0804: "有爱魔兽黑体 UI",
+				0x0404: "有愛魔獸新黑 UI",
+				0x0C04: "有愛魔獸新黑 UI",
+				0x0411: "有愛ウォークラフト新ゴシック UI",
+				0x0412: "有愛 네오 워크래프트 고딕 UI",
+			},
 		}
+
+	if p.family == "Latin":
+		return {
+			0x0409: "Nowar Neo UI LCG",
+			0x0804: "Nowar Neo UI LCG",
+			0x0404: "Nowar Neo UI LCG",
+			0x0C04: "Nowar Neo UI LCG",
+			0x0411: "Nowar Neo UI LCG",
+			0x0412: "Nowar Neo UI LCG",
+		}
+
+	isLocalized = {
+		0x0804: bool(regionalVariant[p.region]["Hans"]),
+		0x0404: bool(regionalVariant[p.region]["Hant"]),
+		0x0C04: bool(regionalVariant[p.region]["Hant"]),
+		0x0411: bool(regionalVariant[p.region]["Hans"]),
+		0x0412: bool(regionalVariant[p.region]["ko"]),
 	}
-	return impl[p.family](GetRegion(p))
+
+	result = dict(LocalizedFamily.nameList[p.family])
+	result.update({ lang: result[0x0409] for lang, local in isLocalized.items() if not local })
+	return result
+
+def GetTagList(p):
+	if p.family == "Latin":
+		tagList = p.feature
+	else:
+		tagList = [ p.region ] + p.feature
+	return tagList
+
+def GetTagStr(p):
+	tagList = GetTagList(p)
+	return ",".join(tagList)
+
+def TagListToStr(lst):
+	return ",".join(lst)
+
+def TagStrToList(s):
+	return s.split(",")
+
+def GenerateFamily(p):
+	localizedFamily = LocalizedFamily(p)
+	tagList = GetTagList(p)
+	if len(tagList):
+		return {
+			lang: localizedFamily[lang] + " " + " ".join([ tagNameMap[tag] for tag in tagList ])
+			for lang in localizedFamily
+		}
+	else:
+		return localizedFamily
 
 def GenerateSubfamily(p):
 	width = widthMap[p.width]
@@ -270,21 +325,30 @@ def GenerateLegacySubfamily(p):
 			return "{} {}".format(width, weight) if width else weight, "Regular"
 
 def GenerateFilename(p):
-	familyName = {
-		"Sans": lambda region: "NowarNeoSans-" + region,
-		"UI": lambda region: "NowarNeoUI-" + region,
-		"WarcraftSans": lambda region: "NowarNeoWarcraftSans-" + region,
-		"WarcraftUI": lambda region: "NowarNeoWarcraftUI-" + region,
-		"Latin": lambda region: "NowarNeoUI",
-	}
-	if p.family in [ "Roboto", "RobotoCondensed" ]:
-		return "{}-{}".format(p.family, GenerateSubfamily(p).replace(" ", ""))
-	elif p.family == "Source":
-		return "{}-{}".format(GetRegion(p), GenerateSubfamily(p).replace(" ", ""))
+	if p.family in [ "Sans", "UI", "WarcraftSans", "WarcraftUI" ]:
+		encodingPrefix = p.encoding + "-"
+		nameList = {
+			"Sans": "NowarNeoSans",
+			"UI": "NowarNeoUI",
+			"WarcraftSans": "NowarNeoWarcraftSans",
+			"WarcraftUI": "NowarNeoWarcraftUI",
+		}
+		familyName = nameList[p.family] + "-" + GetTagStr(p)
 	elif p.family == "Latin":
-		return "{}-{}".format(familyName[p.family](GetRegion(p)), GenerateSubfamily(p).replace(" ", ""))
+		encodingPrefix = ""
+		nameList = {
+			"Latin": "NowarNeoLCG",
+		}
+		familyName = nameList[p.family] + "-" + GetTagStr(p)
 	else:
-		return "{}-{}-{}".format(p.encoding, familyName[p.family](GetRegion(p)), GenerateSubfamily(p).replace(" ", ""))
+		encodingPrefix = ""
+		nameList = {
+			"Roboto": lambda p: "Roboto",
+			"RobotoCondensed": lambda p: "RobotoCondensed",
+			"Source": lambda p: p.region,
+		}
+		familyName = nameList[p.family](p)
+	return encodingPrefix + familyName + "-" + GenerateSubfamily(p).replace(" ", "")
 
 def ResolveDependency(p):
 	result = {
@@ -309,135 +373,146 @@ def ResolveDependency(p):
 		)
 	return result
 
-def GetMorpheus(weight):
+def GetMorpheus(weight, feature):
 	return Namespace(
 		weight = morpheusWeightMap[weight],
 		width = 3,
-		family = "Latin"
+		family = "Latin",
+		feature = feature,
 	)
 
-def GetSkurri(weight):
+def GetSkurri(weight, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
-		family = "Latin"
+		family = "Latin",
+		feature = feature,
 	)
 
-def GetLatinFont(weight, region):
+def GetLatinFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
 		family = "UI",
-		region = region,
+		region = regionalVariant[region]["Latn"],
+		feature = feature,
 		encoding = "unspec"
 	)
 
-def GetLatinChatFont(weight, region):
+def GetLatinChatFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 3,
 		family = "UI",
-		region = region,
+		region = regionalVariant[region]["Latn"],
+		feature = feature,
 		encoding = "unspec"
 	)
 
-def GetHansFont(weight, region):
+def GetHansFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
 		family = "WarcraftSans",
 		region = regionalVariant[region]["Hans"],
+		feature = feature,
 		encoding = "gbk"
 	)
 
-def GetHansCombatFont(weight, region):
+def GetHansCombatFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
 		family = "Sans",
 		region = regionalVariant[region]["Hans"],
+		feature = feature,
 		encoding = "gbk"
 	)
 
-def GetHansChatFont(weight, region):
+def GetHansChatFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 3,
 		family = "Sans",
 		region = regionalVariant[region]["Hans"],
+		feature = feature,
 		encoding = "gbk"
 	)
 
-def GetHantFont(weight, region):
+def GetHantFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
 		family = "WarcraftSans",
 		region = regionalVariant[region]["Hant"],
+		feature = feature,
 		encoding = "big5"
 	)
 
-def GetHantCombatFont(weight, region):
+def GetHantCombatFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
 		family = "Sans",
 		region = regionalVariant[region]["Hant"],
+		feature = feature,
 		encoding = "big5"
 	)
 
-def GetHantNoteFont(weight, region):
+def GetHantNoteFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
 		family = "Sans",
 		region = regionalVariant[region]["Hant"],
+		feature = feature,
 		encoding = "big5"
 	)
 
-def GetHantChatFont(weight, region):
+def GetHantChatFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 3,
 		family = "Sans",
 		region = regionalVariant[region]["Hant"],
+		feature = feature,
 		encoding = "big5"
 	)
 
 
-def GetKoreanFont(weight, region):
+def GetKoreanFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
-		family = "Sans",
+		family = "UI",
 		region = regionalVariant[region]["ko"],
+		feature = feature,
 		encoding = "korean"
 	)
 
-def GetKoreanCombatFont(weight, region):
+def GetKoreanCombatFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 5,
-		family = "Sans",
+		family = "UI",
 		region = regionalVariant[region]["ko"],
+		feature = feature,
 		encoding = "korean"
 	)
 
-def GetKoreanDisplayFont(weight, region):
+def GetKoreanDisplayFont(weight, region, feature):
 	return Namespace(
 		weight = weight,
 		width = 3,
-		family = "Sans",
+		family = "UI",
 		region = regionalVariant[region]["ko"],
+		feature = feature,
 		encoding = "korean"
 	)
 
 def ParamToArgument(conf):
-	escapeList = [ ' ', '"', '{', '}' ]
-	js = json.dumps(conf.__dict__)
-	for c in escapeList:
-		js = js.replace(c, '\\' + c)
-	return js
+	js = json.dumps(conf.__dict__, separators=(',',':'))
+	return "'{}'".format(js)
 
 if __name__ == "__main__":
 	makefile = {
@@ -445,76 +520,80 @@ if __name__ == "__main__":
 			"VERSION": config.version,
 		},
 		"rule": {
+			".PHONY": {
+				"depend": [ "all" ],
+			},
 			"all": {
-				"depend": [ "SharedMedia-NowarNeoSans-${VERSION}.7z" ],
+				"depend": [ "out/SharedMedia-NowarNeoSans-${VERSION}.7z" ],
 			},
 			"clean": {
 				"command": [
-					"-rm -rf roboto/*.otd shs/*.otd nowar/*.otd",
-					"-rm -rf {}".format(" ".join([ "{}-{}/".format(r, w) for r, w in product(config.fontPackRegion, config.fontPackWeight) ])),
-					"-rm -rf NowarNeoSansTypeface/",
+					"-rm -rf build/",
+					"-rm -rf out/NowarNeoSansTypeface/",
+					"-rm -rf out/??*-???/",
 				]
 			}
 		},
 	}
 
 	unique = lambda l: reduce(lambda l, x: l + [ x ] if x not in l else l, l, [])
+	powerset = lambda lst: reduce(lambda result, x: result + [subset + [x] for subset in result], lst, [[]])
 
 	# SharedMedia font provider
-	makefile["rule"]["SharedMedia-NowarNeoSans-${VERSION}.7z"] = {
-		"depend": [ "nowar/{}.ttf".format(GenerateFilename(p)) for p in sum(config.fontProviderInstance.values(), []) ],
+	makefile["rule"]["out/SharedMedia-NowarNeoSans-${VERSION}.7z"] = {
+		"depend": [ "build/nowar/{}.ttf".format(GenerateFilename(p)) for p in sum(config.fontProviderInstance.values(), []) ],
 		"command": [
 			# copy inferface directory
-			"cp -r libsm NowarNeoSansTypeface",
-			"cp LICENSE.txt NowarNeoSansTypeface/",
-			"mkdir -p NowarNeoSansTypeface/Fonts/",
+			"mkdir -p out/",
+			"cp -r source/libsm out/NowarNeoSansTypeface",
+			"cp LICENSE.txt out/NowarNeoSansTypeface/",
+			"mkdir -p out/NowarNeoSansTypeface/Fonts/",
 			# replace dummy strings
-			"sed -i 's/__REPLACE_IN_BUILD__VERSION__/${VERSION}/' NowarNeoSansTypeface/NowarNeoSansTypeface.toc",
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{}/}}' NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
+			"sed -i 's/__REPLACE_IN_BUILD__VERSION__/${VERSION}/' out/NowarNeoSansTypeface/NowarNeoSansTypeface.toc",
+			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						# backslashes will be escaped twice by `make` and `sed`
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\\\Addons\\\\NowarNeoSansTypeface\\\\Fonts\\\\{}.ttf]], western + ruRU)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], western + ruRU)'.format(
 							GenerateFriendlyFamily(p)[0x0409],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["western1"]
 					]
 				)
 			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{}/}}' NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
+			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\\\Addons\\\\NowarNeoSansTypeface\\\\Fonts\\\\{}.ttf]], western + ruRU)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], western + ruRU)'.format(
 							GenerateFriendlyFamily(p)[0x0409],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["western2"]
 					]
 				)
 			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{}/}}' NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
+			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\\\Addons\\\\NowarNeoSansTypeface\\\\Fonts\\\\{}.ttf]], zhCN)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], zhCN)'.format(
 							GenerateFriendlyFamily(p)[0x0804],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["zhCN"]
 					]
 				)
 			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{}/}}' NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
+			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\\\Addons\\\\NowarNeoSansTypeface\\\\Fonts\\\\{}.ttf]], zhTW)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], zhTW)'.format(
 							GenerateFriendlyFamily(p)[0x0404],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["zhTW"]
 					]
 				)
 			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_KOKR__/{{s/__REPLACE_IN_BUILD__REGISTER_KOKR__/{}/}}' NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
+			"sed -i '/__REPLACE_IN_BUILD__REGISTER_KOKR__/{{s/__REPLACE_IN_BUILD__REGISTER_KOKR__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\\\Addons\\\\NowarNeoSansTypeface\\\\Fonts\\\\{}.ttf]], koKR)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], koKR)'.format(
 							GenerateFriendlyFamily(p)[0x0412],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["koKR"]
@@ -522,11 +601,11 @@ if __name__ == "__main__":
 				)
 			),
 			# copy font files
-			"for file in $^; do cp $$file NowarNeoSansTypeface/Fonts/$${file#nowar/*-}; done",
+			"for file in $^; do cp $$file out/NowarNeoSansTypeface/Fonts/$${file#build/nowar/*-}; done",
 			# pack with 7z, group them by weight to generate smaller file in less time
-			"7z a -t7z -m0=LZMA:d=512m:fb=273 -ms $@ NowarNeoSansTypeface/ -x!NowarNeoSansTypeface/Fonts/\\*.ttf",
+			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ NowarNeoSansTypeface/ -x!NowarNeoSansTypeface/Fonts/\\*.ttf",
 		] + [
-			"7z a -t7z -m0=LZMA:d=512m:fb=273 -ms $@ " + " ".join([
+			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ " + " ".join([
 				"NowarNeoSansTypeface/Fonts/{}.ttf".format(GenerateFilename(p).replace("unspec-", ""))
 					for p in unique(sum(config.fontProviderInstance.values(), []))
 					if p.weight == w
@@ -535,98 +614,114 @@ if __name__ == "__main__":
 	}
 
 	# font pack for each regional variant and weight
-	for r, w in product(config.fontPackRegion, config.fontPackWeight):
-		target = "{}-{}".format(r, w)
-		pack = "NowarNeoSans-{}-${{VERSION}}.7z".format(target)
-		makefile["rule"]["all"]["depend"].append(pack)
-		fontlist = {
-			"ARIALN": GetLatinChatFont(w, r),
-			"FRIZQT__": GetLatinFont(w, r),
-			"MORPHEUS": GetMorpheus(w),
-			"skurri": GetSkurri(w),
+	for r, w, fea in product(config.fontPackRegion, config.fontPackWeight, powerset(config.fontPackFeature)):
+		tagList = [ r ] + fea
+		target = "{}-{}".format(TagListToStr(tagList), w)
+		pack = "out/NowarNeoSans-{}-${{VERSION}}.7z".format(target)
 
-			"FRIZQT___CYR": GetLatinFont(w, r),
-			"MORPHEUS_CYR": GetMorpheus(w),
-			"SKURRI_CYR": GetSkurri(w),
+		makefile["rule"][".PHONY"]["depend"].append(target)
+		makefile["rule"][target] = {
+			"depend": [ pack ],
+		}
+
+		if fea == [] or (r, fea) in config.fontPackExportFeature:
+			makefile["rule"]["all"]["depend"].append(pack)
+
+		fontlist = {
+			"ARIALN": GetLatinChatFont(w, r, fea),
+			"FRIZQT__": GetLatinFont(w, r, fea),
+			"MORPHEUS": GetMorpheus(w, fea),
+			"skurri": GetSkurri(w, fea),
+
+			"FRIZQT___CYR": GetLatinFont(w, r, fea),
+			"MORPHEUS_CYR": GetMorpheus(w, fea),
+			"SKURRI_CYR": GetSkurri(w, fea),
 		}
 
 		if regionalVariant[r]["Hans"]:
 			fontlist.update({
-				"ARKai_C": GetHansCombatFont(w, r),
-				"ARKai_T": GetHansFont(w, r),
-				"ARHei": GetHansChatFont(w, r),
+				"ARKai_C": GetHansCombatFont(w, r, fea),
+				"ARKai_T": GetHansFont(w, r, fea),
+				"ARHei": GetHansChatFont(w, r, fea),
 			})
 
 		if regionalVariant[r]["Hant"]:
 			fontlist.update({
-				"arheiuhk_bd": GetHantChatFont(w, r),
-				"bHEI00M": GetHantNoteFont(w, r),
-				"bHEI01B": GetHantChatFont(w, r),
-				"bKAI00M": GetHantCombatFont(w, r),
-				"blei00d": GetHantFont(w, r),
+				"arheiuhk_bd": GetHantChatFont(w, r, fea),
+				"bHEI00M": GetHantNoteFont(w, r, fea),
+				"bHEI01B": GetHantChatFont(w, r, fea),
+				"bKAI00M": GetHantCombatFont(w, r, fea),
+				"blei00d": GetHantFont(w, r, fea),
 			})
 
 		if regionalVariant[r]["ko"]:
 			fontlist.update({
-				"2002": GetKoreanFont(w, r),
-				"2002B": GetKoreanFont(w, r),
-				"K_Damage": GetKoreanCombatFont(w, r),
-				"K_Pagetext": GetKoreanDisplayFont(w, r),
+				"2002": GetKoreanFont(w, r, fea),
+				"2002B": GetKoreanFont(w, r, fea),
+				"K_Damage": GetKoreanCombatFont(w, r, fea),
+				"K_Pagetext": GetKoreanDisplayFont(w, r, fea),
 			})
 
 		makefile["rule"][pack] = {
-			"depend": [ "{}/Fonts/{}.ttf".format(target, f) for f in fontlist ],
+			"depend": [ "out/{}/Fonts/{}.ttf".format(target, f) for f in fontlist ],
 			"command": [
-				"cd {};".format(target) +
-				"cp ../LICENSE.txt Fonts/LICENSE.txt;" +
-				"7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ Fonts/"
+				"cd out/{};".format(target) +
+				"cp ../../LICENSE.txt Fonts/LICENSE.txt;" +
+				"7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../../$@ Fonts/"
 			]
 		}
 
 		for f, p in fontlist.items():
-			makefile["rule"]["{}/Fonts/{}.ttf".format(target, f)] = {
-				"depend": [ "nowar/{}.ttf".format(GenerateFilename(p)) ],
+			makefile["rule"]["out/{}/Fonts/{}.ttf".format(target, f)] = {
+				"depend": [ "build/nowar/{}.ttf".format(GenerateFilename(p)) ],
 				"command": [
-					"mkdir -p {}/Fonts".format(target),
+					"mkdir -p out/{}/Fonts".format(target),
 					"cp $^ $@",
 				]
 			}
 
 	# Sans, UI
-	for f, w, wd, r in product([ "Sans", "UI" ], config.fontPackWeight, [ 3, 5 ], regionNameMap.keys()):
+	for f, w, wd, r, fea in product([ "Sans", "UI" ], config.fontPackWeight, [3, 5], regionNameMap.keys(), powerset(config.fontPackFeature)):
 		param = Namespace(
 			family = f,
 			weight = w,
 			width = wd,
 			region = r,
+			feature = fea,
 			encoding = "unspec",
 		)
-		makefile["rule"]["nowar/{}.ttf".format(GenerateFilename(param))] = {
-			"depend": ["nowar/{}.otd".format(GenerateFilename(param))],
+		makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(param))] = {
+			"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
 			"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
 		}
 		dep = ResolveDependency(param)
-		makefile["rule"]["nowar/{}.otd".format(GenerateFilename(param))] = {
+		makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(param))] = {
 			"depend": [
-				"roboto/{}.otd".format(GenerateFilename(dep["Latin"])),
-				"shs/{}.otd".format(GenerateFilename(dep["CJK"])),
+				"build/roboto/{}.otd".format(GenerateFilename(dep["Latin"])),
+				"build/shs/{}.otd".format(GenerateFilename(dep["CJK"])),
 			],
 			"command": [ 
-				"mkdir -p nowar/",
+				"mkdir -p build/nowar/",
 				"python merge.py {}".format(ParamToArgument(param))
 			]
 		}
-		makefile["rule"]["roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
-			"depend": [ "roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
+		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
+			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
+			"command": [ 
+				"mkdir -p build/roboto/",
+				"otfccdump --ignore-hints $< -o $@",
+			]
+		}
+		makefile["rule"]["build/shs/{}.otd".format(GenerateFilename(dep["CJK"]))] = {
+			"depend": [ "build/shs/{}.ttf".format(GenerateFilename(dep["CJK"])) ],
 			"command": [ "otfccdump --ignore-hints $< -o $@" ]
 		}
-		makefile["rule"]["shs/{}.otd".format(GenerateFilename(dep["CJK"]))] = {
-			"depend": [ "shs/{}.ttf".format(GenerateFilename(dep["CJK"])) ],
-			"command": [ "otfccdump --ignore-hints $< -o $@" ]
-		}
-		makefile["rule"]["shs/{}.ttf".format(GenerateFilename(dep["CJK"]))] = {
-			"depend": [ "shs/{}.otf".format(GenerateFilename(dep["CJK"])) ],
-			"command": [ "otfccdump --ignore-hints $< | otfcc-c2q | otfccbuild -O3 -o $@" ]
+		makefile["rule"]["build/shs/{}.ttf".format(GenerateFilename(dep["CJK"]))] = {
+			"depend": [ "source/shs/{}.otf".format(GenerateFilename(dep["CJK"])) ],
+			"command": [
+				"mkdir -p build/shs/",
+				"otfccdump --ignore-hints $< | otfcc-c2q | otfccbuild -O3 -o $@"
+			]
 		}
 
 		# set encoding
@@ -636,57 +731,69 @@ if __name__ == "__main__":
 				weight = w,
 				width = wd,
 				region = r,
+				feature = fea,
 				encoding = e,
 			)
-			makefile["rule"]["nowar/{}.ttf".format(GenerateFilename(enc))] = {
-				"depend": ["nowar/{}.otd".format(GenerateFilename(enc))],
+			makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(enc))] = {
+				"depend": ["build/nowar/{}.otd".format(GenerateFilename(enc))],
 				"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
 			}
-			makefile["rule"]["nowar/{}.otd".format(GenerateFilename(enc))] = {
-				"depend": ["nowar/{}.otd".format(GenerateFilename(param))],
+			makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(enc))] = {
+				"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
 				"command": [ "python set-encoding.py {}".format(ParamToArgument(enc)) ]
 			}
 
 	# WarcraftSans
-	for w, r in product(config.fontPackWeight, regionNameMap.keys()):
+	for w, r, fea in product(config.fontPackWeight, regionNameMap.keys(), powerset(config.fontPackFeature)):
 		param = Namespace(
 			family = "WarcraftSans",
 			weight = w,
 			width = 5,
 			region = r,
+			feature = fea,
 			encoding = "unspec",
 		)
-		makefile["rule"]["nowar/{}.ttf".format(GenerateFilename(param))] = {
-			"depend": ["nowar/{}.otd".format(GenerateFilename(param))],
+
+		makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(param))] = {
+			"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
 			"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
 		}
 		dep = ResolveDependency(param)
-		makefile["rule"]["nowar/{}.otd".format(GenerateFilename(param))] = {
+		makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(param))] = {
 			"depend": [
-				"roboto/{}.otd".format(GenerateFilename(dep["Latin"])),
-				"roboto/{}.otd".format(GenerateFilename(dep["Numeral"])),
-				"shs/{}.otd".format(GenerateFilename(dep["CJK"])),
+				"build/roboto/{}.otd".format(GenerateFilename(dep["Latin"])),
+				"build/roboto/{}.otd".format(GenerateFilename(dep["Numeral"])),
+				"build/shs/{}.otd".format(GenerateFilename(dep["CJK"])),
 			],
 			"command": [ 
-				"mkdir -p nowar/",
+				"mkdir -p build/nowar/",
 				"python merge.py {}".format(ParamToArgument(param))
 			]
 		}
-		makefile["rule"]["roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
-			"depend": [ "roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
+		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
+			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
+			"command": [ 
+				"mkdir -p build/roboto/",
+				"otfccdump --ignore-hints $< -o $@",
+			]
+		}
+		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Numeral"]))] = {
+			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Numeral"])) ],
+			"command": [ 
+				"mkdir -p build/roboto/",
+				"otfccdump --ignore-hints $< -o $@",
+			]
+		}
+		makefile["rule"]["build/shs/{}.otd".format(GenerateFilename(dep["CJK"]))] = {
+			"depend": [ "build/shs/{}.ttf".format(GenerateFilename(dep["CJK"])) ],
 			"command": [ "otfccdump --ignore-hints $< -o $@" ]
 		}
-		makefile["rule"]["roboto/{}.otd".format(GenerateFilename(dep["Numeral"]))] = {
-			"depend": [ "roboto/{}.ttf".format(GenerateFilename(dep["Numeral"])) ],
-			"command": [ "otfccdump --ignore-hints $< -o $@" ]
-		}
-		makefile["rule"]["shs/{}.otd".format(GenerateFilename(dep["CJK"]))] = {
-			"depend": [ "shs/{}.ttf".format(GenerateFilename(dep["CJK"])) ],
-			"command": [ "otfccdump --ignore-hints $< -o $@" ]
-		}
-		makefile["rule"]["shs/{}.ttf".format(GenerateFilename(dep["CJK"]))] = {
-			"depend": [ "shs/{}.otf".format(GenerateFilename(dep["CJK"])) ],
-			"command": [ "otfccdump --ignore-hints $< | otfcc-c2q | otfccbuild -O3 -o $@" ]
+		makefile["rule"]["build/shs/{}.ttf".format(GenerateFilename(dep["CJK"]))] = {
+			"depend": [ "source/shs/{}.otf".format(GenerateFilename(dep["CJK"])) ],
+			"command": [
+				"mkdir -p build/shs/",
+				"otfccdump --ignore-hints $< | otfcc-c2q | otfccbuild -O3 -o $@"
+			]
 		}
 
 		for e in [ "gbk", "big5", "jis", "korean" ]:
@@ -695,48 +802,53 @@ if __name__ == "__main__":
 				weight = w,
 				width = 5,
 				region = r,
+				feature = fea,
 				encoding = e,
 			)
-			makefile["rule"]["nowar/{}.ttf".format(GenerateFilename(enc))] = {
-				"depend": ["nowar/{}.otd".format(GenerateFilename(enc))],
+			makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(enc))] = {
+				"depend": ["build/nowar/{}.otd".format(GenerateFilename(enc))],
 				"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
 			}
-			makefile["rule"]["nowar/{}.otd".format(GenerateFilename(enc))] = {
-				"depend": ["nowar/{}.otd".format(GenerateFilename(param))],
+			makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(enc))] = {
+				"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
 				"command": [ "python set-encoding.py {}".format(ParamToArgument(enc)) ]
 			}
 
 	# Latin
-	for w, wd in product(config.fontPackWeight + [ morpheusWeightMap[w] for w in config.fontPackWeight ], [ 3, 5 ]):
+	for w, wd, fea in product(config.fontPackWeight + [ morpheusWeightMap[w] for w in config.fontPackWeight ], [3, 5], powerset(config.fontPackFeature)):
 		param = Namespace(
 			family = "Latin",
 			weight = w,
 			width = wd,
+			feature = fea,
 		)
-		makefile["rule"]["nowar/{}.ttf".format(GenerateFilename(param))] = {
-			"depend": ["nowar/{}.otd".format(GenerateFilename(param))],
+		makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(param))] = {
+			"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
 			"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
 		}
 		dep = ResolveDependency(param)
-		makefile["rule"]["nowar/{}.otd".format(GenerateFilename(param))] = {
+		makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(param))] = {
 			"depend": [
-				"roboto/{}.otd".format(GenerateFilename(dep["Latin"])),
+				"build/roboto/{}.otd".format(GenerateFilename(dep["Latin"])),
 			],
 			"command": [ 
-				"mkdir -p nowar/",
+				"mkdir -p build/nowar/",
 				"python merge.py {}".format(ParamToArgument(param))
 			]
 		}
-		makefile["rule"]["roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
-			"depend": [ "roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
-			"command": [ "otfccdump --ignore-hints $< -o $@" ]
+		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
+			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
+			"command": [
+				"mkdir -p build/roboto/",
+				"otfccdump --ignore-hints $< -o $@",
+			]
 		}
 
 	# dump `makefile` dict to actual “GNU Makefile”
 	makedump = ""
 
 	for var, val in makefile["variable"].items():
-		makedump += "{} = {}\n".format(var, val)
+		makedump += "{}={}\n".format(var, val)
 
 	for tar, recipe in makefile["rule"].items():
 		dep = recipe["depend"] if "depend" in recipe else []
