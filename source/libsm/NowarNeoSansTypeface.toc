@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80300
 
 ## Title: Nowar Neo Sans Typeface
 ## Notes: Register Nowar Neo Sans typeface to SharedMedia.
