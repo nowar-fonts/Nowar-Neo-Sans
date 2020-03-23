@@ -5,8 +5,8 @@ from itertools import product
 from types import SimpleNamespace as Namespace
 
 class Config:
-	version = "0.7.0"
-	fontRevision = 0.0700
+	version = "0.7.2"
+	fontRevision = 0.0702
 	vendor = "Nowar Typeface"
 	vendorId = "NOWR"
 	vendorUrl = "https://github.com/nowar-fonts"
@@ -541,7 +541,7 @@ if __name__ == "__main__":
 
 	# SharedMedia font provider
 	makefile["rule"]["out/SharedMedia-NowarNeoSans-${VERSION}.7z"] = {
-		"depend": [ "build/nowar/{}.ttf".format(GenerateFilename(p)) for p in sum(config.fontProviderInstance.values(), []) ],
+		"depend": [ "build/nowar/{}.otf".format(GenerateFilename(p)) for p in sum(config.fontProviderInstance.values(), []) ],
 		"command": [
 			# copy inferface directory
 			"mkdir -p out/",
@@ -553,7 +553,7 @@ if __name__ == "__main__":
 			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], western + ruRU)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], western + ruRU)'.format(
 							GenerateFriendlyFamily(p)[0x0409],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["western1"]
@@ -563,7 +563,7 @@ if __name__ == "__main__":
 			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], western + ruRU)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], western + ruRU)'.format(
 							GenerateFriendlyFamily(p)[0x0409],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["western2"]
@@ -573,7 +573,7 @@ if __name__ == "__main__":
 			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], zhCN)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], zhCN)'.format(
 							GenerateFriendlyFamily(p)[0x0804],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["zhCN"]
@@ -583,7 +583,7 @@ if __name__ == "__main__":
 			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], zhTW)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], zhTW)'.format(
 							GenerateFriendlyFamily(p)[0x0404],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["zhTW"]
@@ -593,7 +593,7 @@ if __name__ == "__main__":
 			"sed -i '/__REPLACE_IN_BUILD__REGISTER_KOKR__/{{s/__REPLACE_IN_BUILD__REGISTER_KOKR__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
 				"\\n".join(
 					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.ttf]], koKR)'.format(
+						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], koKR)'.format(
 							GenerateFriendlyFamily(p)[0x0412],
 							GenerateFilename(p).replace("unspec-", "")
 						) for p in config.fontProviderInstance["koKR"]
@@ -603,10 +603,10 @@ if __name__ == "__main__":
 			# copy font files
 			"for file in $^; do cp $$file out/NowarNeoSansTypeface/Fonts/$${file#build/nowar/*-}; done",
 			# pack with 7z, group them by weight to generate smaller file in less time
-			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ NowarNeoSansTypeface/ -x!NowarNeoSansTypeface/Fonts/\\*.ttf",
+			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ NowarNeoSansTypeface/ -x!NowarNeoSansTypeface/Fonts/\\*.otf",
 		] + [
 			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ " + " ".join([
-				"NowarNeoSansTypeface/Fonts/{}.ttf".format(GenerateFilename(p).replace("unspec-", ""))
+				"NowarNeoSansTypeface/Fonts/{}.otf".format(GenerateFilename(p).replace("unspec-", ""))
 					for p in unique(sum(config.fontProviderInstance.values(), []))
 					if p.weight == w
 			]) for w in config.fontProviderWeight
@@ -673,7 +673,7 @@ if __name__ == "__main__":
 
 		for f, p in fontlist.items():
 			makefile["rule"]["out/{}/Fonts/{}.ttf".format(target, f)] = {
-				"depend": [ "build/nowar/{}.ttf".format(GenerateFilename(p)) ],
+				"depend": [ "build/nowar/{}.otf".format(GenerateFilename(p)) ],
 				"command": [
 					"mkdir -p out/{}/Fonts".format(target),
 					"cp $^ $@",
@@ -690,9 +690,9 @@ if __name__ == "__main__":
 			feature = fea,
 			encoding = "unspec",
 		)
-		makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(param))] = {
+		makefile["rule"]["build/nowar/{}.otf".format(GenerateFilename(param))] = {
 			"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
-			"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
+			"command": [ "otfccbuild -q -O3 --keep-average-char-width $< -o $@" ]
 		}
 		dep = ResolveDependency(param)
 		makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(param))] = {
@@ -706,21 +706,21 @@ if __name__ == "__main__":
 			]
 		}
 		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
+			"depend": [ "build/roboto/{}.otf".format(GenerateFilename(dep["Latin"])) ],
+			"command": [ "otfccdump --glyph-name-prefix latn --ignore-hints $< -o $@" ]
+		}
+		makefile["rule"]["build/roboto/{}.otf".format(GenerateFilename(dep["Latin"]))] = {
 			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
-			"command": [ 
+			"command": [
 				"mkdir -p build/roboto/",
-				"otfccdump --ignore-hints $< -o $@",
+				"otfccdump --ignore-hints $< | otfcc-q2c | otfccbuild -q -O2 -o $@",
 			]
 		}
 		makefile["rule"]["build/shs/{}.otd".format(GenerateFilename(dep["CJK"]))] = {
-			"depend": [ "build/shs/{}.ttf".format(GenerateFilename(dep["CJK"])) ],
-			"command": [ "otfccdump --ignore-hints $< -o $@" ]
-		}
-		makefile["rule"]["build/shs/{}.ttf".format(GenerateFilename(dep["CJK"]))] = {
 			"depend": [ "source/shs/{}.otf".format(GenerateFilename(dep["CJK"])) ],
 			"command": [
 				"mkdir -p build/shs/",
-				"otfccdump --ignore-hints $< | otfcc-c2q | otfccbuild -O3 -o $@"
+				"otfccdump --glyph-name-prefix hani --ignore-hints $< -o $@",
 			]
 		}
 
@@ -734,9 +734,9 @@ if __name__ == "__main__":
 				feature = fea,
 				encoding = e,
 			)
-			makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(enc))] = {
+			makefile["rule"]["build/nowar/{}.otf".format(GenerateFilename(enc))] = {
 				"depend": ["build/nowar/{}.otd".format(GenerateFilename(enc))],
-				"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
+				"command": [ "otfccbuild -q -O3 --keep-average-char-width $< -o $@" ]
 			}
 			makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(enc))] = {
 				"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
@@ -754,9 +754,9 @@ if __name__ == "__main__":
 			encoding = "unspec",
 		)
 
-		makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(param))] = {
+		makefile["rule"]["build/nowar/{}.otf".format(GenerateFilename(param))] = {
 			"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
-			"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
+			"command": [ "otfccbuild -q -O3 --keep-average-char-width $< -o $@" ]
 		}
 		dep = ResolveDependency(param)
 		makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(param))] = {
@@ -771,28 +771,32 @@ if __name__ == "__main__":
 			]
 		}
 		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
+			"depend": [ "build/roboto/{}.otf".format(GenerateFilename(dep["Latin"])) ],
+			"command": [ "otfccdump --glyph-name-prefix latn --ignore-hints $< -o $@" ]
+		}
+		makefile["rule"]["build/roboto/{}.otf".format(GenerateFilename(dep["Latin"]))] = {
 			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
-			"command": [ 
+			"command": [
 				"mkdir -p build/roboto/",
-				"otfccdump --ignore-hints $< -o $@",
+				"otfccdump --ignore-hints $< | otfcc-q2c | otfccbuild -q -O2 -o $@",
 			]
 		}
 		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Numeral"]))] = {
+			"depend": [ "build/roboto/{}.otf".format(GenerateFilename(dep["Numeral"])) ],
+			"command": [ "otfccdump --glyph-name-prefix latn --ignore-hints $< -o $@" ]
+		}
+		makefile["rule"]["build/roboto/{}.otf".format(GenerateFilename(dep["Numeral"]))] = {
 			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Numeral"])) ],
-			"command": [ 
+			"command": [
 				"mkdir -p build/roboto/",
-				"otfccdump --ignore-hints $< -o $@",
+				"otfccdump --ignore-hints $< | otfcc-q2c | otfccbuild -q -O2 -o $@",
 			]
 		}
 		makefile["rule"]["build/shs/{}.otd".format(GenerateFilename(dep["CJK"]))] = {
-			"depend": [ "build/shs/{}.ttf".format(GenerateFilename(dep["CJK"])) ],
-			"command": [ "otfccdump --ignore-hints $< -o $@" ]
-		}
-		makefile["rule"]["build/shs/{}.ttf".format(GenerateFilename(dep["CJK"]))] = {
 			"depend": [ "source/shs/{}.otf".format(GenerateFilename(dep["CJK"])) ],
 			"command": [
 				"mkdir -p build/shs/",
-				"otfccdump --ignore-hints $< | otfcc-c2q | otfccbuild -O3 -o $@"
+				"otfccdump --glyph-name-prefix hani --ignore-hints $< -o $@",
 			]
 		}
 
@@ -805,9 +809,9 @@ if __name__ == "__main__":
 				feature = fea,
 				encoding = e,
 			)
-			makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(enc))] = {
+			makefile["rule"]["build/nowar/{}.otf".format(GenerateFilename(enc))] = {
 				"depend": ["build/nowar/{}.otd".format(GenerateFilename(enc))],
-				"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
+				"command": [ "otfccbuild -q -O3 --keep-average-char-width $< -o $@" ]
 			}
 			makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(enc))] = {
 				"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
@@ -822,9 +826,9 @@ if __name__ == "__main__":
 			width = wd,
 			feature = fea,
 		)
-		makefile["rule"]["build/nowar/{}.ttf".format(GenerateFilename(param))] = {
+		makefile["rule"]["build/nowar/{}.otf".format(GenerateFilename(param))] = {
 			"depend": ["build/nowar/{}.otd".format(GenerateFilename(param))],
-			"command": [ "otfccbuild -O3 --keep-average-char-width $< -o $@ 2>/dev/null" ]
+			"command": [ "otfccbuild -q -O3 --keep-average-char-width $< -o $@" ]
 		}
 		dep = ResolveDependency(param)
 		makefile["rule"]["build/nowar/{}.otd".format(GenerateFilename(param))] = {
@@ -837,10 +841,14 @@ if __name__ == "__main__":
 			]
 		}
 		makefile["rule"]["build/roboto/{}.otd".format(GenerateFilename(dep["Latin"]))] = {
+			"depend": [ "build/roboto/{}.otf".format(GenerateFilename(dep["Latin"])) ],
+			"command": [ "otfccdump --glyph-name-prefix latn --ignore-hints $< -o $@" ]
+		}
+		makefile["rule"]["build/roboto/{}.otf".format(GenerateFilename(dep["Latin"]))] = {
 			"depend": [ "source/roboto/{}.ttf".format(GenerateFilename(dep["Latin"])) ],
 			"command": [
 				"mkdir -p build/roboto/",
-				"otfccdump --ignore-hints $< -o $@",
+				"otfccdump --ignore-hints $< | otfcc-q2c | otfccbuild -q -O2 -o $@",
 			]
 		}
 
