@@ -52,7 +52,6 @@ GB is a variant that supports a superset of Chinese national standard GB 18030-2
 | GB | Mainland China (UI) | Mainland China | N/A    |
 
 * European: English, Español (AL), Português, Deutsch, Español (EU), Français, Italiano, and Русский.
-* East Asian: 简体中文, 繁體中文, and 한국어.
 * UI: Ambiguous punctations are treated as Western; CJK puctations are half-width.
 
 ### Features
@@ -76,7 +75,7 @@ Nowar Neo Sans is also avialable as an addon (REALLY HUGE!), to register Nowar N
 + basic Unix utils,
 + [Python](https://www.python.org/),
 + [otfcc](https://github.com/caryll/otfcc),
-+ [otfcc-c2q](https://github.com/caryll/otfcc-cubic2quad) and
++ [otfcc-q2c](https://github.com/nowar-fonts/otfcc-quad2cubic) and
 + [7-Zip](https://www.7-zip.org/) (add to `PATH`).
 
 Note:
