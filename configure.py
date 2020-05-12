@@ -27,52 +27,6 @@ class Config:
 		("GB", [ "RP" ]),
 	]
 
-	fontProviderWeight = [ 300, 400, 500, 700 ]
-	fontProviderWidth = [ 3, 5 ]
-	fontProviderInstance = {
-		# seperate western to 2 parts, avoid sed argument strips
-		"western1": [ Namespace(
-			weight = w,
-			width = wd,
-			family = "UI",
-			region = r[0] if type(r) == tuple else r,
-			feature = r[1] if type(r) == tuple else [],
-			encoding = "unspec"
-		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CN", "TW", "HK", "JP" ]) ],
-		"western2": [ Namespace(
-			weight = w,
-			width = wd,
-			family = "UI",
-			region = r[0] if type(r) == tuple else r,
-			feature = r[1] if type(r) == tuple else [],
-			encoding = "unspec"
-		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CL", ("CL", [ "OSF" ]), ("CL", [ "SC" ]), ("CL", [ "OSF", "SC" ]) ]) ],
-		"zhCN": [ Namespace(
-			weight = w,
-			width = wd,
-			family = "Sans",
-			region = r[0] if type(r) == tuple else r,
-			feature = r[1] if type(r) == tuple else [],
-			encoding = "unspec"
-		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "CN", "CL" ]) ],
-		"zhTW": [ Namespace(
-			weight = w,
-			width = wd,
-			family = "Sans",
-			region = r[0] if type(r) == tuple else r,
-			feature = r[1] if type(r) == tuple else [],
-			encoding = "unspec"
-		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "TW", "HK", "CL" ]) ],
-		"koKR": [ Namespace(
-			weight = w,
-			width = wd,
-			family = "UI",
-			region = r[0] if type(r) == tuple else r,
-			feature = r[1] if type(r) == tuple else [],
-			encoding = "unspec"
-		) for w, wd, r in product(fontProviderWeight, fontProviderWidth, [ "KR" ]) ],
-	}
-
 config = Config()
 
 weightMap = {
@@ -524,12 +478,11 @@ if __name__ == "__main__":
 				"depend": [ "all" ],
 			},
 			"all": {
-				"depend": [ "out/SharedMedia-NowarNeoSans-${VERSION}.7z" ],
+				"depend": [],
 			},
 			"clean": {
 				"command": [
 					"-rm -rf build/",
-					"-rm -rf out/NowarNeoSansTypeface/",
 					"-rm -rf out/??*-???/",
 				]
 			}
@@ -538,80 +491,6 @@ if __name__ == "__main__":
 
 	unique = lambda l: reduce(lambda l, x: l + [ x ] if x not in l else l, l, [])
 	powerset = lambda lst: reduce(lambda result, x: result + [subset + [x] for subset in result], lst, [[]])
-
-	# SharedMedia font provider
-	makefile["rule"]["out/SharedMedia-NowarNeoSans-${VERSION}.7z"] = {
-		"depend": [ "build/nowar/{}.otf".format(GenerateFilename(p)) for p in sum(config.fontProviderInstance.values(), []) ],
-		"command": [
-			# copy inferface directory
-			"mkdir -p out/",
-			"cp -r source/libsm out/NowarNeoSansTypeface",
-			"cp LICENSE.txt out/NowarNeoSansTypeface/",
-			"mkdir -p out/NowarNeoSansTypeface/Fonts/",
-			# replace dummy strings
-			"sed -i 's/__REPLACE_IN_BUILD__VERSION__/${VERSION}/' out/NowarNeoSansTypeface/NowarNeoSansTypeface.toc",
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN1__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
-				"\\n".join(
-					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], western + ruRU)'.format(
-							GenerateFriendlyFamily(p)[0x0409],
-							GenerateFilename(p).replace("unspec-", "")
-						) for p in config.fontProviderInstance["western1"]
-					]
-				)
-			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{{s/__REPLACE_IN_BUILD__REGISTER_WESTERN2__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
-				"\\n".join(
-					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], western + ruRU)'.format(
-							GenerateFriendlyFamily(p)[0x0409],
-							GenerateFilename(p).replace("unspec-", "")
-						) for p in config.fontProviderInstance["western2"]
-					]
-				)
-			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHCN__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
-				"\\n".join(
-					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], zhCN)'.format(
-							GenerateFriendlyFamily(p)[0x0804],
-							GenerateFilename(p).replace("unspec-", "")
-						) for p in config.fontProviderInstance["zhCN"]
-					]
-				)
-			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{{s/__REPLACE_IN_BUILD__REGISTER_ZHTW__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
-				"\\n".join(
-					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], zhTW)'.format(
-							GenerateFriendlyFamily(p)[0x0404],
-							GenerateFilename(p).replace("unspec-", "")
-						) for p in config.fontProviderInstance["zhTW"]
-					]
-				)
-			),
-			"sed -i '/__REPLACE_IN_BUILD__REGISTER_KOKR__/{{s/__REPLACE_IN_BUILD__REGISTER_KOKR__/{}/}}' out/NowarNeoSansTypeface/NowarNeoSansTypeface.lua".format(
-				"\\n".join(
-					[
-						r'NowarNeoSansTypeface:Register("font", "{}", [[Interface\\Addons\\NowarNeoSansTypeface\\Fonts\\{}.otf]], koKR)'.format(
-							GenerateFriendlyFamily(p)[0x0412],
-							GenerateFilename(p).replace("unspec-", "")
-						) for p in config.fontProviderInstance["koKR"]
-					]
-				)
-			),
-			# copy font files
-			"for file in $^; do cp $$file out/NowarNeoSansTypeface/Fonts/$${file#build/nowar/*-}; done",
-			# pack with 7z, group them by weight to generate smaller file in less time
-			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ NowarNeoSansTypeface/ -x!NowarNeoSansTypeface/Fonts/\\*.otf",
-		] + [
-			"cd out/; 7z a -t7z -m0=LZMA:d=512m:fb=273 -ms ../$@ " + " ".join([
-				"NowarNeoSansTypeface/Fonts/{}.otf".format(GenerateFilename(p).replace("unspec-", ""))
-					for p in unique(sum(config.fontProviderInstance.values(), []))
-					if p.weight == w
-			]) for w in config.fontProviderWeight
-		]
-	}
 
 	# font pack for each regional variant and weight
 	for r, w, fea in product(config.fontPackRegion, config.fontPackWeight, powerset(config.fontPackFeature)):
