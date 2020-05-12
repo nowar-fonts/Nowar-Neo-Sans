@@ -1,4 +1,5 @@
-Copyright © 2018—2020 Cyano Hao and Nowar Typeface, with reserved font name “Nowar”, “有爱”, and “有愛”.
+Copyright © 2018—2020 Cyano Hao and Nowar Typeface, with
+Reserved Font Name “Nowar”, “Новар”, “Νοωαρ”, “有爱”, and “有愛”.
 
 Portions Copyright 2011 Google Inc.
 
@@ -12,7 +13,8 @@ Version 1.1.
 This license is copied below, and is also available with a FAQ at:
 https://scripts.sil.org/OFL
 
-Part of the source files, Roboto fonts, were initially released by Google under the Apache License, Version 2.0. The license can be found at:
+Part of the source files, Roboto fonts, were initially released by Google
+under the Apache License, Version 2.0. The license can be found at:
 https://www.apache.org/licenses/LICENSE-2.0
 
 -----------------------------------------------------------
